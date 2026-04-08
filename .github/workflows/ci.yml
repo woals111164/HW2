@@ -1,6 +1,5 @@
 name: CI/CD to Docker Hub (HW2)
 
-# main 브랜치에 push 될 때 자동으로 실행됩니다.
 on:
   push:
     branches:
@@ -8,25 +7,18 @@ on:
 
 jobs:
   build-and-push:
-    # 우분투 최신 환경에서 실행합니다.
     runs-on: ubuntu-latest
 
     steps:
-      # 1. GitHub 저장소의 코드를 체크아웃합니다. (woals111164/HW2)
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. Docker Hub에 로그인합니다.
-      # [https://github.com/woals111164/HW2/settings/secrets/actions] 경로에서
-      # DOCKERHUB_USERNAME 과 DOCKERHUB_PASSWORD 를 추가해야 합니다.
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 3. Docker 이미지를 빌드하고 Docker Hub로 푸시합니다.
-      # 이미지 이름: [Docker Hub 아이디]/hw2:latest
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -34,65 +26,6 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/hw2:latest
-
-      # 4. (선택) /health 엔드포인트 작동 확인 테스트
-      - name: Test Docker Container /health endpoint
-        run: |
-          docker run -d -p 8000:8000 --name test-api ${{ secrets.DOCKERHUB_USERNAME }}/hw2:latest
-          # 서버가 시작할 시간을 기다려줍니다.
-          sleep 5
-          # /health 엔드포인트에 요청을 보내 200 응답이 오는지 확인합니다.
-          curl -f http://localhost:8000/health
-          # 컨테이너 종료 및 정리
-          docker stop test-api
-
-          name: CI/CD to Docker Hub (HW2)
-
-# main 브랜치에 push 될 때 자동으로 실행됩니다.
-on:
-  push:
-    branches:
-      - main
-
-jobs:
-  build-and-push:
-    # 우분투 최신 환경에서 실행합니다.
-    runs-on: ubuntu-latest
-
-    steps:
-      # 1. GitHub 저장소의 코드를 체크아웃합니다. (woals111164/HW2)
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      # 2. Docker Hub에 로그인합니다.
-      # [https://github.com/woals111164/HW2/settings/secrets/actions] 경로에서
-      # DOCKERHUB_USERNAME 과 DOCKERHUB_PASSWORD 를 추가해야 합니다.
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-
-      # 3. Docker 이미지를 빌드하고 Docker Hub로 푸시합니다.
-      # 이미지 이름: [Docker Hub 아이디]/hw2:latest
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/hw2:latest
-
-      # 4. (선택) /health 엔드포인트 작동 확인 테스트
-      - name: Test Docker Container /health endpoint
-        run: |
-          docker run -d -p 8000:8000 --name test-api ${{ secrets.DOCKERHUB_USERNAME }}/hw2:latest
-          # 서버가 시작할 시간을 기다려줍니다.
-          sleep 5
-          # /health 엔드포인트에 요청을 보내 200 응답이 오는지 확인합니다.
-          curl -f http://localhost:8000/health
-          # 컨테이너 종료 및 정리
-          docker stop test-api
 
       - name: Run container
         run: docker run -d -p 8000:8000 --name test-api ${{ secrets.DOCKERHUB_USERNAME }}/hw2:latest
@@ -108,3 +41,7 @@ jobs:
 
       - name: Test health endpoint
         run: curl -f http://localhost:8000/health
+
+      - name: Stop container
+        if: always()
+        run: docker stop test-api || true
