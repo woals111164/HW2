@@ -23,7 +23,7 @@ jobs:
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       # 3. Docker 이미지를 빌드하고 Docker Hub로 푸시합니다.
       # 이미지 이름: [Docker Hub 아이디]/hw2:latest
