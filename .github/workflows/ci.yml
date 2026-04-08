@@ -30,17 +30,19 @@ jobs:
       - name: Run container
         run: docker run -d -p 8000:8000 --name test-api ${{ secrets.DOCKERHUB_USERNAME }}/hw2:latest
 
-      - name: Wait for app startup
-        run: sleep 10
-
-      - name: Show container status
-        run: docker ps -a
-
-      - name: Show container logs
-        run: docker logs test-api
-
-      - name: Test health endpoint
-        run: curl -f http://localhost:8000/health
+      - name: Wait and retry health check
+        run: |
+          for i in {1..10}; do
+            if curl -f http://localhost:8000/health; then
+              exit 0
+            fi
+            sleep 3
+          done
+          echo "=== docker ps -a ==="
+          docker ps -a
+          echo "=== docker logs ==="
+          docker logs test-api
+          exit 1
 
       - name: Stop container
         if: always()
