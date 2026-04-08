@@ -1,0 +1,28 @@
+name: Deploy OCR API (Self-Hosted)
+
+on:
+  workflow_run:
+    workflows: ["CI/CD to Docker Hub (HW2)"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    # GitHub Repository Settings에서 등록한 self-hosted runner에서 실행됨
+    runs-on: self-hosted
+    
+    # ci.yml 워크플로가 성공적으로 (success) 끝났을 때만 배포 진행
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    
+    steps:
+      - name: 자장소 코드 체크아웃 (deploy.sh 스크립트 사용을 위해)
+        uses: actions/checkout@v4
+
+      - name: deploy.sh 스크립트 실행 권한 부여
+        run: chmod +x deploy.sh
+
+      - name: 배포 스크립트 실행
+        env:
+          # GitHub Secrets에 등록해둔 Docker Hub 아이디를 환경변수로 주입
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        run: ./deploy.sh
