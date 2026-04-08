@@ -8,7 +8,6 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# API 라우터 등록
 app.include_router(router, prefix="/api/v1")
 
 @app.on_event("startup")
@@ -18,3 +17,7 @@ async def startup_event():
 @app.get("/")
 def read_root():
     return {"message": "Welcome to OCR Event Extractor API. Visit /docs for Swagger UI."}
+
+@app.get("/health")
+def health_check():
+    return {"status": "ok"}
