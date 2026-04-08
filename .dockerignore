@@ -1,0 +1,37 @@
+# Python 캐시 파일
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 가상 환경
+.venv/
+venv/
+env/
+ENV/
+
+# 환경 변수 및 시크릿
+.env
+.env.local
+
+# Git 파일
+.git/
+.gitignore
+
+# 로그 파일
+*.log
+
+# 테스트 및 커버리지
+.pytest_cache/
+htmlcov/
+.coverage
+.tox/
+
+# IDE 및 에디터 설정
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker 관련
+Dockerfile
+.dockerignore
